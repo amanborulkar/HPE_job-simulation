@@ -1,100 +1,113 @@
-# HPE Software Engineering Job Simulation – Employee REST API
+# HPE Software Engineering Job Simulation — Employee REST API
 
-This project was built as part of the **Hewlett Packard Enterprise (HPE) Software Engineering Job Simulation** on Forage. It demonstrates a RESTful web service built with **Java** and **Spring Boot**, including full CRUD operations and unit testing.
+A Spring Boot REST API built as part of the *HPE (Hewlett Packard Enterprise) Software Engineering Job Simulation*. The service exposes endpoints to retrieve and add employee records, backed by an in-memory store.
 
-## Overview
-
-The simulation covers three core tasks:
-1. **Design and build a RESTful web service** using Java Spring Boot
-2. **Add application support for uploading data** via JSON request bodies
-3. **Write unit tests** to verify application behavior
+---
 
 ## Tech Stack
 
-- Java 21
-- Spring Boot 4.1.0
-- Spring Web (REST)
-- Maven
-- JUnit 5
+| Layer | Technology |
+|---|---|
+| Language | Java 21 |
+| Framework | Spring Boot 4.1.0 |
+| Build tool | Maven (via mvnw wrapper) |
+| Testing | JUnit 5 + Spring Boot Test |
+
+---
 
 ## Project Structure
 
-```
-demo/
+
+main files/
 ├── src/
-│   ├── main/
-│   │   ├── java/com/example/demo/
-│   │   │   ├── DemoApplication.java       # Application entry point
-│   │   │   ├── Employee.java              # Employee model (POJO)
-│   │   │   └── EmployeeController.java    # REST controller (CRUD endpoints)
-│   │   └── resources/
-│   │       └── application.properties     # App configuration (port 8081)
-│   └── test/
-│       └── java/com/example/demo/
-│           └── DemoApplicationTests.java   # Unit tests
+│   ├── main/java/com/example/restservice/
+│   │   ├── RestServiceApplication.java   # Entry point
+│   │   ├── Employee.java                 # Employee model
+│   │   ├── Employees.java                # Wrapper list model
+│   │   ├── EmployeeManager.java          # In-memory repository
+│   │   └── EmployeeController.java       # REST controller
+│   └── test/java/com/example/restservice/
+│       └── RestServiceApplicationTests.java  # Unit tests
 ├── pom.xml
-├── mvnw / mvnw.cmd
-└── README.md
-```
+└── mvnw / mvnw.cmd
+
+
+---
 
 ## API Endpoints
 
-| Method | Endpoint              | Description                  | Request Body Example |
-|--------|-----------------------|-------------------------------|------------------------|
-| GET    | `/employees`          | Get all employees             | —                       |
-| GET    | `/employees/{id}`     | Get employee by ID            | —                       |
-| POST   | `/employees`          | Add a new employee             | `{"id":3,"name":"Priya","department":"Sales"}` |
-| PUT    | `/employees/{id}`     | Update an existing employee   | `{"name":"Updated Name","department":"Finance"}` |
-| DELETE | `/employees/{id}`     | Delete an employee            | —                       |
+Base URL: http://localhost:8080
 
-## Sample Data (Preloaded)
+### GET /employees
+Returns all employees.
 
-| ID | Name  | Department  |
-|----|-------|-------------|
-| 1  | Aman  | Engineering |
-| 2  | Rahul | HR          |
+*Response*
+json
+{
+  "employeeList": [
+    {
+      "id": "1",
+      "firstName": "First1",
+      "lastName": "Last1",
+      "email": "Email1",
+      "title": "Title1"
+    }
+  ]
+}
 
-## How to Run
 
-### Prerequisites
-- Java 21 (JDK)
-- Maven (or use the included `mvnw` / `mvnw.cmd` wrapper)
+### POST /employees
+Adds a new employee. Returns 201 Created with a Location header pointing to the new resource.
 
-### Run the application
-```bash
+*Request body*
+json
+{
+  "employee_id": "djones3",
+  "first_name": "Daria",
+  "last_name": "Jones",
+  "email": "dariajones@gmail.com",
+  "title": "Software Developer"
+}
+
+
+---
+
+## Running Locally
+
+*Prerequisites:* Java 21, Maven (or use the included wrapper)
+
+bash
+cd "main files"
+
+# Run the app
 ./mvnw spring-boot:run
-```
-On Windows:
-```powershell
-.\mvnw.cmd spring-boot:run
-```
 
-The app starts on **http://localhost:8081**
-
-### Test the API
-```bash
-curl http://localhost:8081/employees
-```
-
-Or use [Postman](https://www.postman.com/) to test GET, POST, PUT, and DELETE requests.
-
-## Run Unit Tests
-```bash
+# Run tests
 ./mvnw test
-```
-On Windows:
-```powershell
-.\mvnw.cmd test
-```
 
-## What I Learned
 
-- Building RESTful APIs with Spring Boot annotations (`@RestController`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`)
-- Handling JSON request/response bodies with `@RequestBody`
-- Using `@PathVariable` for dynamic routing
-- Writing and running unit tests with Spring Boot's testing framework
-- Project setup and dependency management with Maven
+On Windows, use mvnw.cmd instead of ./mvnw.
 
-## About
+The server starts on http://localhost:8080 by default.
 
-Built as part of the [HPE Software Engineering Virtual Experience Program](https://www.theforage.com/simulations/hewlett-packard-enterprise/software-engineering-pcij) on Forage.
+---
+
+## Data Persistence
+
+The service uses an *in-memory static list* — data resets on every restart. Three seed employees (1, 2, 3) are pre-loaded at startup via a static initializer in EmployeeManager.
+
+---
+
+## Tests
+
+7 unit tests in RestServiceApplicationTests:
+
+| Test | What it checks |
+|---|---|
+| createEmployeeManager | Employee list is non-empty on init |
+| addEmployee | Adding an employee increments count by 1 |
+| employeeIdInList | Correct ID stored after add |
+| employeeFirstNameInList | Correct first name stored |
+| employeeLastNameInList | Correct last name stored |
+| employeeEmailInList | Correct email stored |
+| employeeTitleInList | Correct title stored
